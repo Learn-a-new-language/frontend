@@ -23,4 +23,4 @@ workflows:
             - aws-s3/copy:
                 from: build/
                 to: s3://learn-new-language-client
-                arguments: --recursive
+                arguments: --recursive --passWithNoTests
