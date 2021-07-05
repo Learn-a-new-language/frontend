@@ -1,6 +1,5 @@
 import styled, { createGlobalStyle } from 'styled-components'
 import { Provider } from 'react-redux'
-import { ChakraProvider } from '@chakra-ui/react'
 import store from './store'
 import reset from './shared/styles/reset'
 import Questions from './Questions'
@@ -10,7 +9,10 @@ const GlobalStyle = createGlobalStyle`
 `
 
 const Wrap = styled.div`
-  background-color: var(--arsenic);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #333131;
   height: 100vh;
   color: var(--white);
 `
@@ -18,12 +20,10 @@ const Wrap = styled.div`
 function App() {
   return (
     <Provider store={store}>
-      <ChakraProvider>
-        <Wrap>
-          <GlobalStyle />
-          <Questions />
-        </Wrap>
-      </ChakraProvider>
+      <Wrap>
+        <GlobalStyle />
+        <Questions />
+      </Wrap>
     </Provider>
   )
 }
