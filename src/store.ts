@@ -1,11 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { learnGermanApi } from './api'
+import { learnGermanApi, giphyApi } from './api'
 
 const store = configureStore({
   reducer: {
     [learnGermanApi.reducerPath]: learnGermanApi.reducer,
+    [giphyApi.reducerPath]: giphyApi.reducer,
   },
-  middleware: getDefaultMiddleware => getDefaultMiddleware().concat(learnGermanApi.middleware),
+  middleware: getDefaultMiddleware => getDefaultMiddleware().concat(learnGermanApi.middleware).concat(learnGermanApi.middleware),
 })
 
 export default store

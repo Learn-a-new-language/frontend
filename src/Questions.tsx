@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { useGetDictionaryQuery } from './api'
+import { useGetDictionaryQuery, useLazySearchQuery, useLazyTranslateQuery } from './api'
 import Svg from './shared/components/Svg'
 import eyeSvg from './assets/svg/eye.svg'
 
@@ -30,6 +30,7 @@ const ListItem = styled.div<IListItem>`
   color: #919191;
   cursor: pointer;
   position: relative;
+  overflow: hidden;
 
   &:hover {
     border-color: #9b9b9b;
@@ -58,6 +59,15 @@ const Word = styled.div`
   font-weight: bold;
 `
 
+const Gif = styled.img`
+  position: absolute;
+  transform: translate(-50%, -50%);
+  left: 50%;
+  top: 50%;
+  rotate: -11deg;
+  opacity: 0.3;
+`
+
 const Link = styled.a`
   color: #b1b1b1;
   opacity: 0.4;
@@ -73,6 +83,8 @@ const Footer = styled.div`
 
 const Questions: React.FC = () => {
   const { data: dictionary, refetch } = useGetDictionaryQuery<any>(25)
+  const [trigger, result, lastPromiseInfo, ] = useLazyTranslateQuery()
+  const [giphys, setGiphys] = useState<{[key: string]: string}>({})
 
   const [results, setResults] = useState<
     {
@@ -80,6 +92,13 @@ const Questions: React.FC = () => {
     }
   >({})
   const [selectedWords, setWords] = useState({ english: '', german: '' })
+
+  useEffect(() => {
+    if (!result.data) return;
+    const resultTest: any = result
+    const wordKey = resultTest?.originalArgs[0];
+    setGiphys({ ...giphys, [wordKey]: resultTest.data.data.images.original.url})
+  }, [result.data])
 
   if (!dictionary) {
     return <div>Loading...</div>
@@ -95,6 +114,9 @@ const Questions: React.FC = () => {
     setWords({ english: '', german: ''})
     const isValid = !!dictionary.data.find(x => x.english === english && x.german === german)
     setResults({ ...results, [english]: isValid, [german]: isValid })
+    if (isValid) {
+      trigger([english, 0]);
+    }
   }
 
   function determineSelected(language: string, word: string) {
@@ -111,6 +133,7 @@ const Questions: React.FC = () => {
 
   const englishWords = dictionary.data.map(x => x.english).sort()
   const germanWords = dictionary.data.map(x => x.german).sort()
+  const germanToEnglish = dictionary.data.reduce((acc, cur) => ({ ...acc, [cur.german]: cur.english}), {})
 
   function renderWords(language, words) {
     function onSvgClick(event) {
@@ -129,6 +152,9 @@ const Questions: React.FC = () => {
             <Svg svg={eyeSvg} size={1.6} onClick={onSvgClick} />
           </Link>
         }
+        {language === 'german' && determineCorrect(word) && giphys[germanToEnglish[word]] && (
+          <Gif src={giphys[germanToEnglish[word]]} />
+        )}
       </ListItem>
     ))
   }
