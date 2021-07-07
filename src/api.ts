@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
-const IS_DEV = true;
+const IS_DEV = false;
 const LOCAL_URL = 'http://localhost:3333/api/'
 const PROD_URL = 'http://learn-german-notion-api-2-env.eba-pr8j3j7w.eu-central-1.elasticbeanstalk.com/api/'
 
