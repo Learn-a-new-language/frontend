@@ -1,28 +1,29 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { useGetDictionaryQuery, useLazySearchQuery, useLazyTranslateQuery } from './api'
+import { useGetDictionaryQuery, useLazyTranslateQuery, useUpdateDictionaryMutation } from './api'
 import Svg from './shared/components/Svg'
 import eyeSvg from './assets/svg/eye.svg'
 
 const Wrap = styled.div`
-  display: flex;
+  /* display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center; */
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 2px;
   padding: var(--size-xlg);
-`
-
-const Columns = styled.div`
-  display: flex;
+  height: 100%;
+  width: 400px;
 `
 const Column = styled.div`
-  margin: 0 2px;
+  display: grid;
+  grid-template-rows: repeat(10, 1fr);
+  grid-gap: 2px;
 `
 
 type IListItem = { isSelected: boolean; isCorrect?: boolean; isIncorrect?: boolean }
 const ListItem = styled.div<IListItem>`
   display: flex;
-  margin: 2px 0;
-  width: 200px;
   justify-content: space-between;
   padding: 8px 12px;
   border: 2px solid #404040;
@@ -82,8 +83,9 @@ const Footer = styled.div`
 `
 
 const Questions: React.FC = () => {
-  const { data: dictionary, refetch } = useGetDictionaryQuery<any>(25)
+  const { data: dictionary, refetch } = useGetDictionaryQuery<any>(10)
   const [trigger, result, lastPromiseInfo, ] = useLazyTranslateQuery()
+  const [updateDictionary] = useUpdateDictionaryMutation(undefined)
   const [giphys, setGiphys] = useState<{[key: string]: string}>({})
 
   const [results, setResults] = useState<
@@ -135,10 +137,16 @@ const Questions: React.FC = () => {
   const germanWords = dictionary.data.map(x => x.german).sort()
   const germanToEnglish = dictionary.data.reduce((acc, cur) => ({ ...acc, [cur.german]: cur.english}), {})
 
+  function onSvgLinkClick(event) {
+    event.stopPropagation()
+  }
+
+  function onSvgPriorityClick(word: string, event: React.MouseEvent<HTMLSpanElement, MouseEvent>) {
+    event.stopPropagation();
+    updateDictionary({ word, priority: 2 })
+  }
+
   function renderWords(language, words) {
-    function onSvgClick(event) {
-      event.stopPropagation()
-    }
     return words.map(word => (
       <ListItem key={word}
         isSelected={determineSelected(language, word)}
@@ -148,9 +156,12 @@ const Questions: React.FC = () => {
       >
         <Word>{word}</Word>
         {language === 'german' &&
-          <Link target="_blank" href={`https://www.linguee.com/english-german/search?source=german&query=${word}`}>
-            <Svg svg={eyeSvg} size={1.6} onClick={onSvgClick} />
-          </Link>
+          <div>
+            {/* <Link target="_blank" href={`https://www.linguee.com/english-german/search?source=german&query=${word}`}>
+              <Svg svg={eyeSvg} size={1.6} onClick={onSvgLinkClick} />
+            </Link> */}
+            <Svg svg={eyeSvg} size={1.6} onClick={(event) => onSvgPriorityClick(word, event)} />
+          </div>
         }
         {language === 'german' && determineCorrect(word) && giphys[germanToEnglish[word]] && (
           <Gif src={giphys[germanToEnglish[word]]} />
@@ -161,17 +172,17 @@ const Questions: React.FC = () => {
 
   return (
     <Wrap>
-      <Columns>
+      {/* <Columns> */}
         <Column>
           {renderWords('english', englishWords)}
         </Column>
         <Column>
           {renderWords('german', germanWords)}
         </Column>
-      </Columns>
+      {/* </Columns>
       <Footer>
         <button onClick={refetch}>Reload</button>
-      </Footer>
+      </Footer> */}
     </Wrap>
   )
 }

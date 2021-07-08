@@ -11,6 +11,13 @@ export const learnGermanApi = createApi({
     getDictionary: builder.query({
       query: (length = 20) => `dictionary?length=${length}`,
     }),
+    updateDictionary: builder.mutation({
+      query: ({ word, priority }) => ({
+        url: `dictionary?word=${word}&priority=${priority}`,
+        method: 'PATCH',
+        body: { word, priority }
+      })
+    })
   }),
 })
 
@@ -27,5 +34,5 @@ export const giphyApi = createApi({
   }),
 })
 
-export const { useGetDictionaryQuery } = learnGermanApi
+export const { useGetDictionaryQuery, useUpdateDictionaryMutation } = learnGermanApi
 export const { useLazySearchQuery, useLazyTranslateQuery } = giphyApi
